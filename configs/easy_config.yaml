@@ -1,0 +1,48 @@
+# Easy configuration for initial learning - very simple task
+
+# Environment configuration
+env:
+  arena_size: 10.0
+  max_steps: 200  # Shorter episodes
+  dt: 0.1
+  damping: 0.02  # Very low damping for responsive control
+  goal_threshold: 1.0  # Larger success threshold
+  obstacle_prob: 0.0  # NO obstacles
+  obstacle_radius_range: [0.5, 1.5]
+  reward_distance_scale: 0.01  # Very small distance penalty
+  reward_success: 500.0  # Very large success reward
+  reward_collision: -5.0
+  reward_time: -0.001  # Minimal time penalty
+  goal_range: [-1.5, 1.5]  # Very close goals
+
+# Agent configuration
+agent:
+  lr_actor: 5.0e-4  # Higher learning rate
+  lr_critic: 5.0e-4
+  gamma: 0.99
+  gae_lambda: 0.95
+  clip_epsilon: 0.2
+  value_coef: 0.5
+  entropy_coef: 0.1  # Very high entropy for exploration
+  max_grad_norm: 1.0  # Allow larger gradients
+  update_epochs: 4
+  actor_hidden_dims: [64, 64]  # Smaller network
+  critic_hidden_dims: [64, 64]
+  device: "cpu"
+
+# Training configuration
+training:
+  total_steps: 200000  # Shorter training for testing
+  rollout_length: 1024  # Shorter rollouts
+  eval_frequency: 5000
+  eval_episodes: 10
+  save_frequency: 50000
+
+# Logging configuration
+logging:
+  log_dir: "results"
+  log_file: "training_easy"
+
+# Random seed
+seed: 42
+

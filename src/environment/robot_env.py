@@ -247,7 +247,9 @@ class RobotEnv(gym.Env):
         action = np.clip(action, self.action_space.low, self.action_space.high)
         
         # Update velocity with damping and acceleration
-        self.robot_vel = self.robot_vel * (1 - self.damping) + action * self.dt
+        # Scale action to make movement more responsive
+        action_scale = 2.0  # Scale actions for more effective movement
+        self.robot_vel = self.robot_vel * (1 - self.damping) + action * action_scale * self.dt
         
         # Update position
         self.robot_pos = self.robot_pos + self.robot_vel * self.dt
@@ -260,7 +262,7 @@ class RobotEnv(gym.Env):
         )
         
         # Clip velocity to prevent excessive speeds
-        max_vel = 5.0
+        max_vel = 3.0  # Reduced max velocity for more controlled movement
         self.robot_vel = np.clip(self.robot_vel, -max_vel, max_vel)
         
         self.step_count += 1
