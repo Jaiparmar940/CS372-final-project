@@ -193,7 +193,8 @@ class RobotEnv(gym.Env):
         if goal_distance > 1e-6:
             goal_direction = goal_direction / goal_distance
             velocity_toward_goal = np.dot(self.robot_vel, goal_direction)
-            progress_reward = 0.1 * max(0, velocity_toward_goal)  # Only reward positive progress
+            # Reward progress more aggressively
+            progress_reward = 0.5 * max(0, velocity_toward_goal)  # Increased from 0.1 to 0.5
         else:
             progress_reward = 0.0
         

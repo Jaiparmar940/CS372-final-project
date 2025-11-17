@@ -7,13 +7,13 @@ env:
   dt: 0.1
   damping: 0.05  # Reduced damping for more responsive control
   goal_threshold: 0.5
-  obstacle_prob: 0.3  # Start with fewer obstacles (curriculum learning)
+  obstacle_prob: 0.0  # Start with NO obstacles for easier initial learning
   obstacle_radius_range: [0.5, 1.5]
-  reward_distance_scale: 0.1  # Much smaller distance penalty
-  reward_success: 100.0
-  reward_collision: -20.0  # Reduced collision penalty
-  reward_time: -0.01  # Reduced time penalty
-  goal_range: [-3.0, 3.0]  # Start with closer goals (curriculum learning)
+  reward_distance_scale: 0.05  # Even smaller distance penalty for better learning
+  reward_success: 200.0  # Increased success reward
+  reward_collision: -10.0  # Further reduced collision penalty
+  reward_time: -0.005  # Minimal time penalty
+  goal_range: [-2.0, 2.0]  # Start with even closer goals for easier learning
 
 # Agent configuration
 agent:
@@ -23,7 +23,7 @@ agent:
   gae_lambda: 0.95
   clip_epsilon: 0.2
   value_coef: 0.5
-  entropy_coef: 0.02  # Increased entropy for better exploration
+  entropy_coef: 0.05  # Much higher entropy for aggressive exploration
   max_grad_norm: 0.5
   update_epochs: 4  # Fewer epochs per batch for faster updates
   actor_hidden_dims: [128, 128]  # Smaller network for faster training
@@ -32,9 +32,9 @@ agent:
 
 # Training configuration
 training:
-  total_steps: 1000000
+  total_steps: 500000  # Reduced for faster iteration
   rollout_length: 2048
-  eval_frequency: 10000
+  eval_frequency: 5000  # More frequent evaluation
   eval_episodes: 10
   save_frequency: 50000
 
