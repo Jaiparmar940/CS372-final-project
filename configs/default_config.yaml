@@ -1,0 +1,48 @@
+# Default configuration for RL project
+
+# Environment configuration
+env:
+  arena_size: 10.0
+  max_steps: 500
+  dt: 0.1
+  damping: 0.1
+  goal_threshold: 0.5
+  obstacle_prob: 0.5
+  obstacle_radius_range: [0.5, 1.5]
+  reward_distance_scale: 1.0
+  reward_success: 100.0
+  reward_collision: -50.0
+  reward_time: -0.1
+  goal_range: [-4.0, 4.0]  # Training goal range
+
+# Agent configuration
+agent:
+  lr_actor: 3.0e-4
+  lr_critic: 3.0e-4
+  gamma: 0.99
+  gae_lambda: 0.95
+  clip_epsilon: 0.2
+  value_coef: 0.5
+  entropy_coef: 0.01
+  max_grad_norm: 0.5
+  update_epochs: 10
+  actor_hidden_dims: [256, 256]
+  critic_hidden_dims: [256, 256]
+  device: "cpu"  # Change to "cuda" if GPU available
+
+# Training configuration
+training:
+  total_steps: 1000000
+  rollout_length: 2048
+  eval_frequency: 10000
+  eval_episodes: 10
+  save_frequency: 50000
+
+# Logging configuration
+logging:
+  log_dir: "results"
+  log_file: "training"
+
+# Random seed
+seed: 42
+
