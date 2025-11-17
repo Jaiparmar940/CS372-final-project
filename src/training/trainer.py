@@ -57,6 +57,7 @@ class Trainer:
         self.total_episodes = 0
         self.episode_rewards = []
         self.episode_lengths = []
+        self.episode_successes = []
         
         # Create log directory
         os.makedirs(log_dir, exist_ok=True)
@@ -97,6 +98,7 @@ class Trainer:
                 # Store episode statistics
                 self.episode_rewards.append(episode_reward)
                 self.episode_lengths.append(episode_length)
+                self.episode_successes.append(step_info.get('success', False))
                 self.total_episodes += 1
                 
                 # Log episode
@@ -137,7 +139,7 @@ class Trainer:
             rewards=batch['rewards'],
             values=batch['values'],
             dones=batch['dones'],
-            next_value=final_value
+            last_value=final_value
         )
         
         # Update agent
@@ -153,6 +155,9 @@ class Trainer:
         if len(self.episode_rewards) > 0:
             metrics['mean_episode_reward'] = np.mean(self.episode_rewards[-100:])
             metrics['mean_episode_length'] = np.mean(self.episode_lengths[-100:])
+            # Compute success rate from recent episodes
+            if len(self.episode_successes) > 0:
+                metrics['success_rate'] = np.mean(self.episode_successes[-100:])
         
         metrics['total_steps'] = self.total_steps
         metrics['total_episodes'] = self.total_episodes

@@ -25,7 +25,7 @@ class RobotEnv(gym.Env):
     def __init__(
         self,
         arena_size: float = 10.0,
-        max_steps: int = 500,
+        max_steps: int = 200,
         dt: float = 0.1,
         damping: float = 0.1,
         goal_threshold: float = 0.5,
@@ -92,6 +92,7 @@ class RobotEnv(gym.Env):
         
         # Internal state
         self.robot_pos = None
+        self.prev_robot_pos = None
         self.robot_vel = None
         self.goal_pos = None
         self.obstacle_pos = None
@@ -170,38 +171,35 @@ class RobotEnv(gym.Env):
         return dist_to_obstacle < self.obstacle_radius
     
     def _compute_reward(self, action: np.ndarray) -> float:
-        """Compute reward for current state and action."""
+        """
+        Reward based on change in distance to goal.
+        """
+        # Distance before movement
+        prev_dx = self.goal_pos[0] - self.prev_robot_pos[0]
+        prev_dy = self.goal_pos[1] - self.prev_robot_pos[1]
+        prev_dist = np.sqrt(prev_dx**2 + prev_dy**2)
+        
+        # Distance after movement
         goal_dx = self.goal_pos[0] - self.robot_pos[0]
         goal_dy = self.goal_pos[1] - self.robot_pos[1]
-        goal_distance = np.sqrt(goal_dx**2 + goal_dy**2)
+        goal_dist = np.sqrt(goal_dx**2 + goal_dy**2)
         
-        # Success reward
-        if goal_distance < self.goal_threshold:
+        # Success check
+        if goal_dist < self.goal_threshold:
             return self.reward_success
         
-        # Collision penalty
+        # Collision check
         if self._check_collision():
             return self.reward_collision
         
-        # Shaped reward: distance-based (negative, encourages getting closer)
-        # Using squared distance for better gradient signal
-        distance_reward = -self.reward_distance_scale * goal_distance
+        # Reward based on progress toward goal
+        delta_dist = prev_dist - goal_dist          # positive if closer
+        distance_reward = 1.0 * delta_dist          # tunable scaling
         
-        # Progress reward: encourage moving toward goal
-        # Compute velocity component toward goal
-        goal_direction = np.array([goal_dx, goal_dy])
-        if goal_distance > 1e-6:
-            goal_direction = goal_direction / goal_distance
-            velocity_toward_goal = np.dot(self.robot_vel, goal_direction)
-            # Reward progress more aggressively
-            progress_reward = 0.5 * max(0, velocity_toward_goal)  # Increased from 0.1 to 0.5
-        else:
-            progress_reward = 0.0
+        # Light time penalty
+        time_penalty = -0.01
         
-        # Time penalty (small)
-        time_penalty = self.reward_time
-        
-        return distance_reward + progress_reward + time_penalty
+        return distance_reward + time_penalty
     
     def reset(
         self,
@@ -218,6 +216,7 @@ class RobotEnv(gym.Env):
         
         # Reset robot to center
         self.robot_pos = np.array([0.0, 0.0], dtype=np.float32)
+        self.prev_robot_pos = self.robot_pos.copy()
         self.robot_vel = np.array([0.0, 0.0], dtype=np.float32)
         
         # Sample goal
@@ -246,9 +245,12 @@ class RobotEnv(gym.Env):
         # Clip action
         action = np.clip(action, self.action_space.low, self.action_space.high)
         
+        # Record previous position before updating
+        self.prev_robot_pos = self.robot_pos.copy()
+        
         # Update velocity with damping and acceleration
         # Scale action to make movement more responsive
-        action_scale = 2.0  # Scale actions for more effective movement
+        action_scale = 4.0  # Scale actions for more effective movement
         self.robot_vel = self.robot_vel * (1 - self.damping) + action * action_scale * self.dt
         
         # Update position

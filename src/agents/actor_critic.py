@@ -118,37 +118,25 @@ class PPOAgent:
         rewards: np.ndarray,
         values: np.ndarray,
         dones: np.ndarray,
-        next_value: float = 0.0
+        last_value: float
     ) -> Tuple[np.ndarray, np.ndarray]:
         """
         Compute Generalized Advantage Estimation (GAE).
-        
-        Args:
-            rewards: Rewards array [T]
-            values: Value estimates [T]
-            dones: Done flags [T]
-            next_value: Value estimate for next state after trajectory
-        
-        Returns:
-            advantages: GAE advantages [T]
-            returns: Discounted returns [T]
         """
         T = len(rewards)
         advantages = np.zeros(T, dtype=np.float32)
         returns = np.zeros(T, dtype=np.float32)
         
         gae = 0.0
+        
+        next_value = last_value
         for t in reversed(range(T)):
-            if dones[t]:
-                delta = rewards[t] - values[t]
-                gae = delta
-            else:
-                delta = rewards[t] + self.gamma * next_value - values[t]
-                gae = delta + self.gamma * self.gae_lambda * gae
-                next_value = values[t]
-            
+            nonterminal = 1.0 - float(dones[t])
+            delta = rewards[t] + self.gamma * next_value * nonterminal - values[t]
+            gae = delta + self.gamma * self.gae_lambda * nonterminal * gae
             advantages[t] = gae
             returns[t] = advantages[t] + values[t]
+            next_value = values[t]
         
         return advantages, returns
     
