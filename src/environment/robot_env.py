@@ -183,13 +183,24 @@ class RobotEnv(gym.Env):
         if self._check_collision():
             return self.reward_collision
         
-        # Distance-based reward (negative, encourages getting closer)
+        # Shaped reward: distance-based (negative, encourages getting closer)
+        # Using squared distance for better gradient signal
         distance_reward = -self.reward_distance_scale * goal_distance
         
-        # Time penalty
+        # Progress reward: encourage moving toward goal
+        # Compute velocity component toward goal
+        goal_direction = np.array([goal_dx, goal_dy])
+        if goal_distance > 1e-6:
+            goal_direction = goal_direction / goal_distance
+            velocity_toward_goal = np.dot(self.robot_vel, goal_direction)
+            progress_reward = 0.1 * max(0, velocity_toward_goal)  # Only reward positive progress
+        else:
+            progress_reward = 0.0
+        
+        # Time penalty (small)
         time_penalty = self.reward_time
         
-        return distance_reward + time_penalty
+        return distance_reward + progress_reward + time_penalty
     
     def reset(
         self,

@@ -15,8 +15,8 @@ from src.utils.plotting import plot_learning_curves
 
 def main():
     parser = argparse.ArgumentParser(description='Plot training results')
-    parser.add_argument('--log_file', type=str, required=True,
-                       help='Path to training log CSV file')
+    parser.add_argument('--log_file', type=str, default='results/training.csv',
+                       help='Path to training log CSV file (default: results/training.csv)')
     parser.add_argument('--output', type=str, default=None,
                        help='Output file for plot (default: show)')
     parser.add_argument('--metrics', type=str, nargs='+', default=None,

@@ -23,7 +23,7 @@ This project implements a complete reinforcement learning framework for training
 
 4. **Plot training curves:**
    ```bash
-   python scripts/plot_results.py --log_file results/training.log.csv
+   python scripts/plot_results.py --log_file results/training.csv
    ```
 
 ## Video Links
